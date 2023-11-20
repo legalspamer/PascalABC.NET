@@ -148,7 +148,7 @@ begin
 end;
 
 begin
-  window.Caption := 'TETЯS v0.2';
+  window.Caption := 'TETЯS';
   window.IsFixedSize := true;
   window.Height := frows * scale;
   window.Width := (fcols + 12) * scale;
