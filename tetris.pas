@@ -16,13 +16,11 @@ const
   frows = 20;
   fcols = 10;
   rows_offset = 4;
-  //bgcolor = RGB(20, 20, 20);
-  //fgcolor = RGB(40, 40, 40);
+  bgcolor = RGB(20, 20, 20);
+  fgcolor = RGB(40, 40, 40);
 var
-  bgcolor := RGB(20, 20, 20);
-  fgcolor := RGB(40, 40, 40);
-
-var
+  //bgcolor := RGB(20, 20, 20);
+  //fgcolor := RGB(40, 40, 40);
   score: integer;
 
 function figurerandom(): array [,] of blocks;
@@ -66,16 +64,15 @@ begin
   end;
 end;
 
-function isempty(c, r: integer; var field: gamefield): boolean;
+function IsEmpty(c, r: integer; var field: gamefield): boolean;
 begin
   if (c in 0..fcols - 1) and (r in 0..frows - 1) then
     result := not field[r, c]
   else result := false;
 end;
 
-function isvalid(c, r: integer; var field: gamefield; figure: figures): boolean;
+function IsValid(c, r: integer; var field: gamefield; figure: figures): boolean;
 begin
-  window.Caption := (c, r).ToString;
   result := true;
   for var rr := 0 to figure.RowCount - 1 do
     for var cc := 0 to figure.ColCount - 1 do
@@ -86,9 +83,8 @@ begin
       end;
 end;
 
-procedure fielddraw(c, r: integer; var field, figure, nextfigure: figures);
+procedure FieldDraw(c, r: integer; var field, figure, nextfigure: figures);
 begin
-  window.Clear(bgcolor);
   for var rr := 0 to field.RowCount - 1 do
     for var cc := 0 to field.ColCount - 1 do
       rectangle(cc * scale, rr * scale, scale, scale, field[rr, cc] ? colors.white : fgcolor);
@@ -100,21 +96,21 @@ begin
     end;
 end;
 
-procedure figuredraw(c, r: integer; var figure: figures);
+procedure FigureDraw(c, r: integer; var figure: figures);
 begin
   for var rr := 0 to figure.RowCount - 1 do
     for var cc := 0 to figure.ColCount - 1 do
       if figure[cc, rr] then rectangle((r + rr) * scale, (c + cc) * scale, scale, scale, colors.yellow);
 end;
 
-procedure figurefix(c, r: integer; var field, figure: figures);
+procedure FigureFix(c, r: integer; var field, figure: figures);
 begin
   for var rr := 0 to figure.RowCount - 1 do
     for var cc := 0 to figure.ColCount - 1 do
       if figure[cc, rr] then field[r + rr, c + cc] := b;
 end;
 
-function figurerotate(figure: figures): figures;
+function FigureRotate(figure: figures): figures;
 begin
   result := transpose(figure);
   for var i := 0 to 1 do result.SwapCols(i, 3 - i);
@@ -135,12 +131,14 @@ begin
 end;
 procedure GameProcess(var r, c:integer; var field:gamefield;var figure,nextfigure:figures);
 begin
+  window.Caption:=$'TETЯIS v0.2 Score:{score.ToString}';
   if isvalid(c, r + 1, field, figure) then r += 1 else 
       begin
         if r = 0 then exit;
         figurefix(c, r, field, figure);
         figure := nextfigure;
         nextfigure := figurerandom;
+        window.Caption:=$'TETЯIS v0.2 Score:{score.ToString}';
         c := 3;
         r := 0;
       end;
@@ -148,25 +146,25 @@ begin
 end;
 
 begin
-  window.Caption := 'TETЯS';
+  window.Caption := 'TETЯS v0.2';
   window.IsFixedSize := true;
   window.Height := frows * scale;
   window.Width := (fcols + 12) * scale;
   leftpanel(scale * 6, bgcolor);
-  window.Clear(bgcolor);
   var newgame := button('Начать игру', 32);
   var quit := button('Выйти', 32);
   var skip := false;
   var dtime: real;
   var delay := 0.3;
-  var (c, r) := (3, 0);
   var field:gamefield;
   var figure:figures;
   var nextfigure:figures;
   var gameover:=true;
-  
+  var c, r :integer;
   newgame.click := ()->
   begin
+    (c, r) := (3, 0);
+    score:=0;
     field := new blocks[frows, fcols];
     figure := figurerandom;
     nextfigure := figurerandom;
@@ -175,6 +173,7 @@ begin
   
   ondrawframe := dt -> 
   begin
+    window.Clear(bgcolor);
     if gameover then exit;
     fielddraw(c, r, field, figure, nextfigure);
     dtime += dt;
